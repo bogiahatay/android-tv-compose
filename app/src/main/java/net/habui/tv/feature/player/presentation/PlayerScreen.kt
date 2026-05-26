@@ -32,9 +32,9 @@ import androidx.media3.ui.PlayerView
 import androidx.tv.material3.MaterialTheme
 import kotlinx.coroutines.delay
 import net.habui.tv.core.designsystem.tvPlayerBackground
-import net.habui.tv.feature.player.components.LiveControls
-import net.habui.tv.feature.player.components.PlayerOverlay
-import net.habui.tv.feature.player.components.VodControls
+import net.habui.tv.feature.player.presentation.components.LiveControls
+import net.habui.tv.feature.player.presentation.components.PlayerOverlay
+import net.habui.tv.feature.player.presentation.components.VodControls
 
 @OptIn(UnstableApi::class)
 @Composable

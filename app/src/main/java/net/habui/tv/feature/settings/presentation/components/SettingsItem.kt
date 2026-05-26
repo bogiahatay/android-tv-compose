@@ -1,4 +1,4 @@
-package net.habui.tv.feature.settings.components
+package net.habui.tv.feature.settings.presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,22 +11,21 @@ import androidx.tv.material3.ListItem
 import androidx.tv.material3.ListItemDefaults
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Switch
 import androidx.tv.material3.Text
 import net.habui.tv.core.designsystem.TvAppTheme
 import net.habui.tv.core.designsystem.tvFocusBorder
 
 @Composable
-fun SettingsToggleItem(
+fun SettingsItem(
     title: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    subtitle: String? = null
+    subtitle: String? = null,
+    trailingContent: @Composable (() -> Unit)? = null,
+    onClick: () -> Unit
 ) {
     ListItem(
         selected = false,
-        onClick = { onCheckedChange(!checked) },
+        onClick = onClick,
         headlineContent = {
             Text(
                 text = title,
@@ -42,12 +41,7 @@ fun SettingsToggleItem(
                 )
             }
         },
-        trailingContent = {
-            Switch(
-                checked = checked,
-                onCheckedChange = null // Handled by ListItem onClick
-            )
-        },
+        trailingContent = trailingContent,
         colors = ListItemDefaults.colors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -67,13 +61,12 @@ fun SettingsToggleItem(
 
 @Preview
 @Composable
-private fun SettingsToggleItemPreview() {
+private fun SettingsItemPreview() {
     TvAppTheme {
-        SettingsToggleItem(
-            title = "Auto Play",
-            subtitle = "Automatically play the next episode",
-            checked = true,
-            onCheckedChange = {}
+        SettingsItem(
+            title = "Video Quality",
+            subtitle = "Auto",
+            onClick = {}
         )
     }
 }

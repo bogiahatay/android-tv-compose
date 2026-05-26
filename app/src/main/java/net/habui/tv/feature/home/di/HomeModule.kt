@@ -1,21 +1,21 @@
-package net.habui.tv.feature.home.data
+package net.habui.tv.feature.home.di
 
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 import net.habui.tv.feature.home.data.remote.api.HomeApi
 import net.habui.tv.feature.home.data.remote.datasource.HomeRemoteDataSource
 import net.habui.tv.feature.home.data.remote.datasource.RetrofitHomeRemoteDataSource
 import net.habui.tv.feature.home.data.repository.HomeRepositoryImpl
 import net.habui.tv.feature.home.domain.repository.HomeRepository
 import retrofit2.Retrofit
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class HomeDataModule {
+abstract class HomeModule {
 
     @Binds
     @Singleton

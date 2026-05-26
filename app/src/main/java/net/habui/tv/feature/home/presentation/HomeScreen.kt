@@ -1,6 +1,5 @@
 package net.habui.tv.feature.home.presentation
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,7 +17,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -29,8 +27,8 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import net.habui.tv.core.focus.PositionFocusedItemInLazyLayout
-import net.habui.tv.feature.home.components.ContentRow
-import net.habui.tv.feature.home.components.FeaturedBanner
+import net.habui.tv.feature.home.presentation.components.ContentRow
+import net.habui.tv.feature.home.presentation.components.FeaturedBanner
 import kotlinx.coroutines.delay
 
 @Composable

@@ -1,4 +1,4 @@
-package net.habui.tv.feature.settings.components
+package net.habui.tv.feature.settings.presentation.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope

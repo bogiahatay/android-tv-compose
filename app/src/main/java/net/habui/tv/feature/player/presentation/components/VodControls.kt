@@ -1,4 +1,4 @@
-package net.habui.tv.feature.player.components
+package net.habui.tv.feature.player.presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

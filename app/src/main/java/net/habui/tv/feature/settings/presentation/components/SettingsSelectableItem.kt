@@ -1,4 +1,4 @@
-package net.habui.tv.feature.settings.components
+package net.habui.tv.feature.settings.presentation.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState

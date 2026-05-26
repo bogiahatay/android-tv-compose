@@ -1,4 +1,4 @@
-package net.habui.tv.feature.player.components
+package net.habui.tv.feature.player.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween

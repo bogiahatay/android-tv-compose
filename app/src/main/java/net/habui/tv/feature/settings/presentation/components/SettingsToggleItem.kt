@@ -1,4 +1,4 @@
-package net.habui.tv.feature.settings.components
+package net.habui.tv.feature.settings.presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,21 +11,22 @@ import androidx.tv.material3.ListItem
 import androidx.tv.material3.ListItemDefaults
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Switch
 import androidx.tv.material3.Text
 import net.habui.tv.core.designsystem.TvAppTheme
 import net.habui.tv.core.designsystem.tvFocusBorder
 
 @Composable
-fun SettingsItem(
+fun SettingsToggleItem(
     title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    subtitle: String? = null,
-    trailingContent: @Composable (() -> Unit)? = null,
-    onClick: () -> Unit
+    subtitle: String? = null
 ) {
     ListItem(
         selected = false,
-        onClick = onClick,
+        onClick = { onCheckedChange(!checked) },
         headlineContent = {
             Text(
                 text = title,
@@ -41,7 +42,12 @@ fun SettingsItem(
                 )
             }
         },
-        trailingContent = trailingContent,
+        trailingContent = {
+            Switch(
+                checked = checked,
+                onCheckedChange = null // Handled by ListItem onClick
+            )
+        },
         colors = ListItemDefaults.colors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -61,12 +67,13 @@ fun SettingsItem(
 
 @Preview
 @Composable
-private fun SettingsItemPreview() {
+private fun SettingsToggleItemPreview() {
     TvAppTheme {
-        SettingsItem(
-            title = "Video Quality",
-            subtitle = "Auto",
-            onClick = {}
+        SettingsToggleItem(
+            title = "Auto Play",
+            subtitle = "Automatically play the next episode",
+            checked = true,
+            onCheckedChange = {}
         )
     }
 }

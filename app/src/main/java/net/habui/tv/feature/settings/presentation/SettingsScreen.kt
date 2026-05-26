@@ -21,10 +21,10 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import net.habui.tv.core.designsystem.TvAppTheme
 import net.habui.tv.core.focus.PositionFocusedItemInLazyLayout
-import net.habui.tv.feature.settings.components.ColorSelector
-import net.habui.tv.feature.settings.components.FontScaleSelector
-import net.habui.tv.feature.settings.components.SettingsSection
-import net.habui.tv.feature.settings.components.ThemeSelector
+import net.habui.tv.feature.settings.presentation.components.ColorSelector
+import net.habui.tv.feature.settings.presentation.components.FontScaleSelector
+import net.habui.tv.feature.settings.presentation.components.SettingsSection
+import net.habui.tv.feature.settings.presentation.components.ThemeSelector
 
 @Composable
 fun SettingsScreen(

@@ -1,4 +1,4 @@
-package net.habui.tv.feature.home.components
+package net.habui.tv.feature.home.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
