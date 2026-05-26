@@ -12,6 +12,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import net.habui.tv.BuildConfig
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -21,11 +22,9 @@ annotation class ApiBaseUrl
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://slave2.iblankdigital.net/tv/api.php/"
-
     @Provides
     @ApiBaseUrl
-    fun provideApiBaseUrl(): String = BASE_URL
+    fun provideApiBaseUrl(): String = BuildConfig.BASE_URL
 
     @Provides
     @Singleton
