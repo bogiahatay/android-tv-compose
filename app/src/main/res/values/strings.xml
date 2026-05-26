@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">TV</string>
+    <string name="settings_title">Settings</string>
+    <string name="playback_section">Playback</string>
+    <string name="appearance_section">Appearance</string>
+    <string name="about_section">About</string>
+    <string name="auto_play">Auto Play</string>
+    <string name="auto_play_description">Automatically play the next episode</string>
+    <string name="subtitle">Subtitle</string>
+    <string name="video_quality">Video Quality</string>
+    <string name="audio_language">Audio Language</string>
+    <string name="theme">Theme</string>
+    <string name="font_scale">Font Scale</string>
+    <string name="reduced_animation">Reduced Animation</string>
+    <string name="app_version">App Version</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+</resources>
