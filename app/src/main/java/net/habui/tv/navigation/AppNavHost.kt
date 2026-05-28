@@ -1,13 +1,15 @@
 package net.habui.tv.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -15,20 +17,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -44,8 +43,6 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.ModalNavigationDrawer
 import androidx.tv.material3.NavigationDrawerItem
-import androidx.tv.material3.NavigationDrawerItemDefaults
-import androidx.tv.material3.NavigationDrawerScope
 import androidx.tv.material3.Text
 import androidx.tv.material3.rememberDrawerState
 import net.habui.tv.feature.home.presentation.HomeScreen
@@ -53,6 +50,7 @@ import net.habui.tv.feature.home.presentation.HomeViewModel
 import net.habui.tv.feature.player.presentation.PlayerScreen
 import net.habui.tv.feature.settings.presentation.SettingsScreen
 import net.habui.tv.feature.settings.presentation.SettingsViewModel
+import timber.log.Timber
 
 private val CollapsedDrawerWidth = 80.dp
 private val DrawerGradientWidth = 360.dp
@@ -61,317 +59,167 @@ private val DrawerGradientWidth = 360.dp
 @Composable
 fun AppNavHost() {
     val settingsViewModel: SettingsViewModel = hiltViewModel()
-
     AppNavHost(settingsViewModel = settingsViewModel)
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun AppNavHost(
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
 ) {
-
     val navController = rememberNavController()
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val focusManager = LocalFocusManager.current
-
     val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val drawerGradientWidthPx = with(LocalDensity.current) { DrawerGradientWidth.toPx() }
 
-    val homeDrawerFocusRequester = remember { FocusRequester() }
+    var focusedIndex by rememberSaveable { mutableIntStateOf(0) }
+    val restoreFocusRequester = remember { FocusRequester() }
+    val contentFocusRequester = remember { FocusRequester() }
 
-    val settingsDrawerFocusRequester = remember { FocusRequester() }
-
-    val drawerGradientWidthPx = with(LocalDensity.current) {
-        DrawerGradientWidth.toPx()
-    }
-
-    var homeFocusRestoreRequest by remember {
-        mutableIntStateOf(0)
-    }
-
-    var focusedDrawerRoute by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    val topLevelRoutes = remember {
-        listOf(
-            Route.Home.route,
-            Route.Settings.route
-        )
-    }
-
+    val topLevelRoutes = remember { listOf(Route.Home.route, Route.Settings.route) }
     val showDrawer = currentRoute in topLevelRoutes
 
     fun navigateTopLevel(route: String) {
-
         if (currentRoute == route) return
-
         navController.navigate(route) {
-
-            popUpTo(
-                navController.graph.findStartDestination().id
-            ) {
+            popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
-
             launchSingleTop = true
-
             restoreState = true
         }
     }
 
-    fun closeDrawerAndRestoreContentFocus() {
-
-        drawerState.setValue(DrawerValue.Closed)
-
-        if (currentRoute == Route.Home.route) {
-            homeFocusRestoreRequest++
-        } else {
-            focusManager.moveFocus(FocusDirection.Right)
-        }
+    LaunchedEffect(showDrawer) {
+        if (!showDrawer) drawerState.setValue(DrawerValue.Closed)
     }
 
-    LaunchedEffect(currentRoute) {
-
-        if (!showDrawer) {
-
-            drawerState.setValue(DrawerValue.Closed)
-
-            focusedDrawerRoute = null
-        }
-    }
-
-    LaunchedEffect(drawerState.currentValue) {
-
-        if (drawerState.currentValue == DrawerValue.Open) {
-
-            when (currentRoute) {
-
-                Route.Home.route -> {
-                    homeDrawerFocusRequester.requestFocus()
-                }
-
-                Route.Settings.route -> {
-                    settingsDrawerFocusRequester.requestFocus()
-                }
-            }
-        }
-    }
-
-    if (showDrawer) {
-
-        val isDrawerExpanded =
-            drawerState.currentValue == DrawerValue.Open
-
-        val highlightedDrawerRoute =
-            if (isDrawerExpanded) {
-                focusedDrawerRoute ?: currentRoute
-            } else {
-                currentRoute
-            }
-
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            if (showDrawer) {
                 Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.surface)
                         .fillMaxHeight()
                         .padding(12.dp)
-                        .selectableGroup(),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                        .focusProperties {
+                            onEnter = {
+                                Timber.tag("TV_FOCUS").d("NavigationDrawer onEnter -> restore focus = $focusedIndex")
+                                restoreFocusRequester.requestFocus()
+                                FocusRequester.Cancel
+                            }
+                            onExit = {
+                                Timber.tag("TV_FOCUS").d("NavigationDrawer onExit")
+                                FocusRequester.Default
+                            }
+                        }
+                        .focusGroup()
                 ) {
-
-                    DrawerItem(
-                        selected = highlightedDrawerRoute == Route.Home.route,
-                        icon = Icons.Default.Home,
-                        label = "Trang chủ",
-                        focusRequester = homeDrawerFocusRequester,
-                        onFocused = {
-                            focusedDrawerRoute = Route.Home.route
-                        },
+                    NavigationDrawerItem(
+                        selected = focusedIndex == 0,
+                        modifier = Modifier.then(
+                            if (focusedIndex == 0) Modifier.focusRequester(restoreFocusRequester)
+                            else Modifier
+                        ),
                         onClick = {
-
+                            focusedIndex = 0
+                            drawerState.setValue(DrawerValue.Closed)
                             if (currentRoute == Route.Home.route) {
-
-                                closeDrawerAndRestoreContentFocus()
-
+                                contentFocusRequester.requestFocus()
                             } else {
-
                                 navigateTopLevel(Route.Home.route)
                             }
-                        }
-                    )
-
-                    DrawerItem(
-                        selected = highlightedDrawerRoute == Route.Settings.route,
-                        icon = Icons.Default.Settings,
-                        label = "Cài đặt",
-                        focusRequester = settingsDrawerFocusRequester,
-                        onFocused = {
-                            focusedDrawerRoute = Route.Settings.route
                         },
+                        leadingContent = {
+                            Icon(imageVector = Icons.Default.Home, contentDescription = null)
+                        }
+                    ) {
+                        Text("Home")
+                    }
+                    NavigationDrawerItem(
+                        selected = focusedIndex == 2,
+                        modifier = Modifier.then(
+                            if (focusedIndex == 2) Modifier.focusRequester(restoreFocusRequester)
+                            else Modifier
+                        ),
                         onClick = {
-
+                            focusedIndex = 2
+                            drawerState.setValue(DrawerValue.Closed)
                             if (currentRoute == Route.Settings.route) {
-
-                                closeDrawerAndRestoreContentFocus()
-
+                                contentFocusRequester.requestFocus()
                             } else {
-
                                 navigateTopLevel(Route.Settings.route)
                             }
+                        },
+                        leadingContent = {
+                            Icon(imageVector = Icons.Default.Settings, contentDescription = null)
                         }
-                    )
+                    ) {
+                        Text("Cài Đặt")
+                    }
                 }
-            },
-            scrimBrush = Brush.horizontalGradient(
-                colors = listOf(
-                    MaterialTheme.colorScheme.scrim,
-                    Color.Transparent
-                ),
-                startX = 0f,
-                endX = drawerGradientWidthPx
-            )
+            }
+        },
+        scrimBrush = Brush.horizontalGradient(
+            colors = listOf(MaterialTheme.colorScheme.scrim, Color.Transparent),
+            startX = 0f,
+            endX = drawerGradientWidthPx
+        )
+    ) {
+        NavHost(
+            navController = navController,
+            startDestination = Route.Home.route,
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            modifier = Modifier
+                .fillMaxSize()
+                .focusRequester(contentFocusRequester)
         ) {
+            composable(Route.Home.route) {
+                val viewModel: HomeViewModel = hiltViewModel()
 
-            Box(
-                modifier = Modifier
-                    .padding(start = CollapsedDrawerWidth)
-                    .fillMaxSize()
-            ) {
-
-                NavContent(
-                    navController = navController,
-                    homeFocusRestoreRequest = homeFocusRestoreRequest,
-                    settingsViewModel = settingsViewModel
+                HomeScreen(
+                    modifier = Modifier.padding(start = CollapsedDrawerWidth),
+                    viewModel = viewModel,
+                    onMovieClick = { movie ->
+                        navController.navigate(
+                            Route.Player.createRoute(
+                                contentId = movie.id,
+                                playbackType = movie.playbackType.name,
+                                title = movie.title,
+                                streamUrl = movie.videoUrl
+                            )
+                        )
+                    }
                 )
             }
-        }
 
-    } else {
+            composable(
+                route = Route.Player.route,
+                arguments = listOf(
+                    navArgument("contentId") { type = NavType.StringType },
+                    navArgument("playbackType") { type = NavType.StringType },
+                    navArgument("title") { type = NavType.StringType },
+                    navArgument("streamUrl") { type = NavType.StringType }
+                )
+            ) {
+                PlayerScreen()
+            }
 
-        NavContent(
-            navController = navController,
-            homeFocusRestoreRequest = homeFocusRestoreRequest,
-            settingsViewModel = settingsViewModel
-        )
-    }
-}
-
-@Composable
-private fun NavigationDrawerScope.DrawerItem(
-    selected: Boolean,
-    icon: ImageVector,
-    label: String,
-    focusRequester: FocusRequester,
-    onFocused: () -> Unit,
-    onClick: () -> Unit,
-) {
-
-    NavigationDrawerItem(
-        selected = selected,
-        onClick = onClick,
-        modifier = Modifier
-            .focusRequester(focusRequester)
-            .onFocusChanged {
-
-                if (it.isFocused) {
-                    onFocused()
+            composable(Route.Settings.route) {
+                Box(
+                    modifier = Modifier
+                        .padding(start = CollapsedDrawerWidth)
+                        .fillMaxSize()
+                ) {
+                    SettingsScreen(viewModel = settingsViewModel)
                 }
-            },
-        leadingContent = {
-
-            Icon(
-                imageVector = icon,
-                contentDescription = null
-            )
-        },
-        colors = NavigationDrawerItemDefaults.colors(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            focusedContainerColor = MaterialTheme.colorScheme.inverseSurface,
-            focusedContentColor = MaterialTheme.colorScheme.inverseOnSurface,
-            pressedContainerColor = MaterialTheme.colorScheme.inverseSurface,
-            pressedContentColor = MaterialTheme.colorScheme.inverseOnSurface,
-            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-            selectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            focusedSelectedContainerColor = MaterialTheme.colorScheme.inverseSurface,
-            focusedSelectedContentColor = MaterialTheme.colorScheme.inverseOnSurface,
-            pressedSelectedContainerColor = MaterialTheme.colorScheme.inverseSurface,
-            pressedSelectedContentColor = MaterialTheme.colorScheme.inverseOnSurface
-        )
-    ) {
-
-        Text(text = label)
-    }
-}
-
-@Composable
-private fun NavContent(
-    navController: androidx.navigation.NavHostController,
-    homeFocusRestoreRequest: Int,
-    settingsViewModel: SettingsViewModel
-) {
-
-    NavHost(
-        navController = navController,
-        startDestination = Route.Home.route,
-        modifier = Modifier.fillMaxSize()
-    ) {
-
-        composable(Route.Home.route) {
-
-            val viewModel: HomeViewModel = hiltViewModel()
-
-            HomeScreen(
-                viewModel = viewModel,
-                focusRestoreRequest = homeFocusRestoreRequest,
-                onMovieClick = { movie ->
-
-                    navController.navigate(
-                        Route.Player.createRoute(
-                            contentId = movie.id,
-                            playbackType = movie.playbackType.name,
-                            title = movie.title,
-                            streamUrl = movie.videoUrl
-                        )
-                    )
-                }
-            )
-        }
-
-        composable(
-            route = Route.Player.route,
-            arguments = listOf(
-                navArgument("contentId") {
-                    type = NavType.StringType
-                },
-                navArgument("playbackType") {
-                    type = NavType.StringType
-                },
-                navArgument("title") {
-                    type = NavType.StringType
-                },
-                navArgument("streamUrl") {
-                    type = NavType.StringType
-                }
-            )
-        ) {
-
-            PlayerScreen()
-        }
-
-        composable(Route.Settings.route) {
-
-            SettingsScreen(viewModel = settingsViewModel)
+            }
         }
     }
 }

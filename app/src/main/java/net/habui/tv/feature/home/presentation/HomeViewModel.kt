@@ -9,6 +9,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 import net.habui.tv.core.result.AppError
 import net.habui.tv.core.result.Resource
+import net.habui.tv.feature.home.domain.model.FeaturedMovie
 import net.habui.tv.feature.home.domain.model.HomeContent
 import net.habui.tv.feature.home.domain.model.Movie
 import net.habui.tv.feature.home.domain.model.MovieSection
@@ -63,10 +64,24 @@ class HomeViewModel @Inject constructor(
 
     private fun HomeContent.toUiState(): HomeUiState {
         return HomeUiState(
-            featuredMovie = featuredMovie?.toUiModel(),
+            featuredMovies = featuredMovies.map { it.toUiModel() },
             sections = sections.map { it.toUiModel() },
             isLoading = false,
             error = null
+        )
+    }
+
+    private fun FeaturedMovie.toUiModel(): FeaturedMovieUiModel {
+        return FeaturedMovieUiModel(
+            id = id,
+            title = title,
+            description = description,
+            imageUrl = imageUrl,
+            videoUrl = videoUrl,
+            playbackType = when (playbackType) {
+                net.habui.tv.feature.home.domain.model.PlaybackType.Live -> PlaybackType.Live
+                net.habui.tv.feature.home.domain.model.PlaybackType.Vod -> PlaybackType.Vod
+            }
         )
     }
 

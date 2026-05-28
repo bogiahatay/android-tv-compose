@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import dagger.hilt.android.AndroidEntryPoint
 import net.habui.tv.navigation.AppNavHost
 import net.habui.tv.core.designsystem.TvAppTheme
+import net.habui.tv.feature.demo.NavigationDrawerScreen
 import net.habui.tv.feature.settings.presentation.SettingsUiState
 import net.habui.tv.feature.settings.presentation.SettingsViewModel
 import net.habui.tv.feature.settings.presentation.toThemeConfig

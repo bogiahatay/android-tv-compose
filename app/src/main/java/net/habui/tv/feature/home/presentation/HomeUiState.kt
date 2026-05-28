@@ -1,7 +1,7 @@
 package net.habui.tv.feature.home.presentation
 
 data class HomeUiState(
-    val featuredMovie: MovieUiModel? = null,
+    val featuredMovies: List<FeaturedMovieUiModel> = emptyList(),
     val sections: List<MovieSectionUiModel> = emptyList(),
     val isLoading: Boolean = false,
     val error: HomeUiError? = null
@@ -30,6 +30,23 @@ sealed interface HomeUiError {
         override val message: String = "Server error ($code). Please try again."
     }
 }
+
+data class FeaturedMovieUiModel(
+    val id: String,
+    val title: String,
+    val description: String,
+    val imageUrl: String,
+    val videoUrl: String,
+    val playbackType: PlaybackType = PlaybackType.Vod
+)
+
+fun FeaturedMovieUiModel.toMovieUiModel() = MovieUiModel(
+    id = id,
+    title = title,
+    imageUrl = imageUrl,
+    videoUrl = videoUrl,
+    playbackType = playbackType
+)
 
 data class MovieSectionUiModel(
     val title: String,
