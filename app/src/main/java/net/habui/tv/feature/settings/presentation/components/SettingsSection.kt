@@ -39,6 +39,7 @@ private fun SettingsSectionPreview() {
         SettingsSection(title = "Playback") {
             SettingsItem(title = "Item 1", onClick = {})
             SettingsItem(title = "Item 2", onClick = {})
+            SettingsItem(title = "Item 3", onClick = {})
         }
     }
 }
