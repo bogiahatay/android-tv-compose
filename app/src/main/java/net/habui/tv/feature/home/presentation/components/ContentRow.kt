@@ -1,13 +1,15 @@
 package net.habui.tv.feature.home.presentation.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyListPrefetchStrategy
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -16,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import net.habui.tv.core.focus.AlwaysAnchorFocusedItemInLazyLayout
 import net.habui.tv.feature.home.presentation.MovieUiModel
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContentRow(
     title: String,
@@ -27,33 +30,15 @@ fun ContentRow(
     onFocusedItemChanged: (Int) -> Unit = {},
 ) {
 
-    val listState = rememberSaveable(rowIndex, saver = LazyListState.Saver) {
-        LazyListState()
-    }
 
     val density = LocalDensity.current
+    val windowWidth = LocalWindowInfo.current.containerSize.width
 
-    /**
-     * Fixed anchor position where focused items should align.
-     */
-    val anchorOffset = 48.dp
-
-    val anchorOffsetPx = with(density) {
-        anchorOffset.toPx()
-    }
-
-    /**
-     * Current viewport width.
-     */
-    val viewportWidth = with(density) {
-        LocalWindowInfo.current.containerSize.width.toDp()
-    }
-
-    /**
-     * Add enough trailing space so even the last item
-     * can still scroll into the anchor position.
-     */
-    val endPadding = viewportWidth - anchorOffset
+    val anchorOffsetPx = remember(density) { with(density) { 48.dp.toPx() } }
+    val endPadding = remember(density, windowWidth) { with(density) { windowWidth.toDp() - 48.dp } }
+    val lazyRowState = rememberLazyListState(
+        prefetchStrategy = remember { LazyListPrefetchStrategy(nestedPrefetchItemCount = 5) }
+    )
 
 
     Column(
@@ -67,7 +52,7 @@ fun ContentRow(
         ) {
 
             LazyRow(
-                state = listState,
+                state = lazyRowState,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(
                     start = 48.dp,
